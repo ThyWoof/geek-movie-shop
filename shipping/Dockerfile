@@ -23,5 +23,8 @@ EXPOSE 8080
 WORKDIR /opt/shipping
 
 COPY --from=build /opt/shipping/target/shipping-1.0-jar-with-dependencies.jar shipping.jar
-
-CMD [ "java",  "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar" ]
+RUN \
+  mkdir /opt/newrelic && \
+  wget -O /opt/newrelic/newrelic.jar http://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar && \
+  wget -O /opt/newrelic/newrelic.yml http://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.yml
+CMD [ "java", "-javaagent:/opt/newrelic/newrelic.jar", "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar" ]
