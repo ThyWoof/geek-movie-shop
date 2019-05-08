@@ -112,6 +112,10 @@ services:
     environment:
       - MYSQL_HOST=mysql
       - CART_HOST=cart
+      - NEW_RELIC_APP_NAME=shipping-service
+      - NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
+      - NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+      - NEW_RELIC_LABELS=clusterName:$CLUSTER_NAME;service:shipping
   ratings:
     build:
       context: ratings

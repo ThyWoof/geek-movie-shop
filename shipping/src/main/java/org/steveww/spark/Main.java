@@ -1,5 +1,6 @@
 package org.steveww.spark;
 
+import com.newrelic.api.agent.NewRelic;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import spark.Spark;
 
@@ -98,6 +99,7 @@ public class Main {
         Spark.get("/cities/:code", (req, res) -> {
             String data;
             try {
+                NewRelic.addCustomParameter("country", req.params(":code"));
                 String query = "select uuid, name from cities where country_code = ?";
                 logger.info("Query " + query);
                 data = queryToJson(query, req.params(":code"));
