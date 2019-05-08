@@ -1,0 +1,194 @@
+version: '3'
+services:
+  mongodb:
+    build:
+      context: mongo
+    image: $DOCKERHUB_USER/rs-mongodb:$TAG
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mysql:
+    build:
+      context: mysql
+    image: $DOCKERHUB_USER/rs-mysql:$TAG
+    cap_add:
+      - NET_ADMIN
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  rabbitmq:
+    image: rabbitmq:3.7-management-alpine
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  redis:
+    image: redis:4.0.6
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  catalogue:
+    build:
+      context: catalogue
+    image: $DOCKERHUB_USER/rs-catalogue:$TAG
+    depends_on:
+      - mongodb
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MONGO_HOST=mongodb
+  cart:
+    build:
+      context: cart
+    image: $DOCKERHUB_USER/rs-cart:$TAG
+    depends_on:
+      - redis
+      - catalogue
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - REDIS_HOST=redis
+      - CATALOGUE_HOST=catalogue
+  user:
+    build:
+      context: user
+    image: $DOCKERHUB_USER/rs-user:$TAG
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MONGO_HOST=mongodb
+      - REDIS_HOST=redis
+  shipping:
+    build:
+      context: shipping
+    image: $DOCKERHUB_USER/rs-shipping:$TAG
+    depends_on:
+      - mysql
+      - cart
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MYSQL_HOST=mysql
+      - CART_HOST=cart
+  ratings:
+    build:
+      context: ratings
+    image: $DOCKERHUB_USER/rs-ratings:$TAG
+    networks:
+      - geek-shop
+    depends_on:
+      - mysql
+      - catalogue
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MYSQL_HOST=mysql
+      - CATALOGUE_HOST=catalogue
+  payment:
+    build:
+      context: payment
+    image: $DOCKERHUB_USER/rs-payment:$TAG
+    depends_on:
+      - rabbitmq
+      - cart
+      - user
+    networks:
+      - geek-shop
+    environment:
+      - AMQP_HOST=rabbitmq
+      - CART_HOST=cart
+      - USER_HOST=user
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  dispatch:
+    build:
+      context: dispatch
+    image: $DOCKERHUB_USER/rs-dispatch:$TAG
+    depends_on:
+      - rabbitmq
+    networks:
+      - geek-shop
+    environment:
+      - AMQP_HOST=rabbitmq
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  web:
+    build:
+      context: web
+    image: $DOCKERHUB_USER/rs-web:$TAG
+    depends_on:
+      - catalogue
+      - cart
+      - user
+      - shipping
+      - ratings
+      - payment
+    ports:
+      - "8888:8080"
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - CATALOGUE_HOST=catalogue
+      - CART_HOST=cart
+      - USER_HOST=user
+      - SHIPPING_HOST=shipping
+      - RATINGS_HOST=ratings
+      - PAYMENT_HOST=payment
+  loader:
+    build:
+      context: loader
+    image: $DOCKERHUB_USER/rs-loader:$TAG
+    depends_on:
+      - web
+    networks:
+      - geek-shop
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - HOST=$PUBLIC_URL
+      - CLIENTS=1
+      - ERROR=0
+networks:
+  geek-shop:
