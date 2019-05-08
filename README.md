@@ -107,6 +107,14 @@ The store front is available on [http://EC2_INSTANCE_PUBLIC_DNS:8888](http://loc
     
 3. Deploy services
 
+    `docker login`
+    
+    `cd ~/${GITHUB_REPO}`
+    
+    `docker-compose push`
+    
+    `cd ~/${GITHUB_REPO}/_infra`
+
     `./k8-services.sh -c`
 
 4. Take note of EKS Load Balancer public URL
