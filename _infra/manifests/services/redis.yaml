@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment-$CLUSTER_NAME
+  labels:
+    app: redis-$CLUSTER_NAME
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-$CLUSTER_NAME
+  template:
+    metadata:
+      labels:
+        io.kompose.service: redis-$CLUSTER_NAME
+        cloudProvider: $CLUSTER_NAME
+        app: redis-$CLUSTER_NAME
+    spec:
+      containers:
+      - name: redis-$CLUSTER_NAME
+        image: redis:4.0.6
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: redis-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "6379"
+    port: 6379
+    targetPort: 6379
+  selector:
+    io.kompose.service: redis-$CLUSTER_NAME
+status:
+  loadBalancer: {}

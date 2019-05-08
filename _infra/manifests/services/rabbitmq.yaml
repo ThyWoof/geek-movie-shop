@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment-$CLUSTER_NAME
+  labels:
+    app: rabbitmq-$CLUSTER_NAME
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-$CLUSTER_NAME
+  template:
+    metadata:
+      labels:
+        io.kompose.service: rabbitmq-$CLUSTER_NAME
+        cloudProvider: $CLUSTER_NAME
+        app: rabbitmq-$CLUSTER_NAME
+    spec:
+      containers:
+      - name: rabbitmq-$CLUSTER_NAME
+        image: rabbitmq:3.7-management-alpine
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: rabbitmq-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "5672"
+    port: 5672
+    targetPort: 5672
+  - name: "15672"
+    port: 15672
+    targetPort: 15672
+  selector:
+    io.kompose.service: rabbitmq-$CLUSTER_NAME
+status:
+  loadBalancer: {}

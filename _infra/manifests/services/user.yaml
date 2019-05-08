@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: user-$CLUSTER_NAME
+    cloudProvider: $CLUSTER_NAME
+  name: user-$CLUSTER_NAME
+spec:
+  containers:
+  - env:
+    - name: NEW_RELIC_APP_NAME
+      value: user-service-$CLUSTER_NAME,user-service
+    - name: NEW_RELIC_LICENSE_KEY
+      value: $NEW_RELIC_LICENSE_KEY
+    - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+      value: "true"
+    - name: NEW_RELIC_LABELS
+      value: clusterName:$CLUSTER_NAME;service:user
+    - name: MONGO_HOST
+      value: mongodb-$CLUSTER_NAME
+    - name: REDIS_HOST
+      value: redis-$CLUSTER_NAME
+    image: $DOCKERHUB_USER/rs-user:$TAG
+    name: user-$CLUSTER_NAME
+    ports:
+    - containerPort: 8080
+    resources: {}
+  restartPolicy: OnFailure
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: user-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  selector:
+    io.kompose.service: user-$CLUSTER_NAME
+status:
+  loadBalancer: {}

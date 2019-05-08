@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment-$CLUSTER_NAME
+  labels:
+    app: mysql-$CLUSTER_NAME
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-$CLUSTER_NAME
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mysql-$CLUSTER_NAME
+        cloudProvider: $CLUSTER_NAME
+        app: mysql-$CLUSTER_NAME
+    spec:
+      containers:
+      - name: mysql-$CLUSTER_NAME
+        image: $DOCKERHUB_USER/rs-mysql:$TAG
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: mysql-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "3306"
+    port: 3306
+    targetPort: 3306
+  selector:
+    io.kompose.service: mysql-$CLUSTER_NAME
+status:
+  loadBalancer: {}

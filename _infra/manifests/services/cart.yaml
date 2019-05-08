@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: cart-$CLUSTER_NAME
+    cloudProvider: $CLUSTER_NAME
+  name: cart-$CLUSTER_NAME
+spec:
+  containers:
+  - env:
+    - name: NEW_RELIC_APP_NAME
+      value: cart-service-$CLUSTER_NAME,cart-service
+    - name: NEW_RELIC_LICENSE_KEY
+      value: $NEW_RELIC_LICENSE_KEY
+    - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+      value: "true"
+    - name: NEW_RELIC_LABELS
+      value: clusterName:$CLUSTER_NAME;service:cart
+    - name: REDIS_HOST
+      value: redis-$CLUSTER_NAME
+    - name: CATALOGUE_HOST
+      value: catalogue-$CLUSTER_NAME
+    image: $DOCKERHUB_USER/rs-cart:$TAG
+    name: cart-$CLUSTER_NAME
+    ports:
+    - containerPort: 8080
+    resources: {}
+  restartPolicy: OnFailure
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: cart-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  selector:
+    io.kompose.service: cart-$CLUSTER_NAME
+status:
+  loadBalancer: {}
