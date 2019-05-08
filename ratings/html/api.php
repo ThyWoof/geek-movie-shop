@@ -29,6 +29,9 @@ class RatingsAPI extends API {
     protected function fetch() {
         if($this->method == 'GET' && isset($this->verb) && count($this->args) == 0) {
             $sku = $this->verb;
+            if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+              newrelic_add_custom_parameter('sku', $sku);
+            }
             if(! $this->_checkSku($sku)) {
                 throw new Exception("$sku not found", 404);
             }
@@ -46,6 +49,10 @@ class RatingsAPI extends API {
             $sku = $this->verb;
             $score = intval($this->args[0]);
             $score = min(max(1, $score), 5);
+
+            if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+                newrelic_record_custom_event("SKURating", array("sku"=>$sku, "score"=>$score));
+            }
 
             if(! $this->_checkSku($sku)) {
                 throw new Exception("$sku not found", 404);

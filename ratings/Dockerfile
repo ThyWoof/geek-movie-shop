@@ -29,3 +29,14 @@ COPY html/ /var/www/html
 COPY docker-php-entrypoint.sh /usr/local/bin/docker-php-entrypoint
 RUN \
   chmod +x /usr/local/bin/docker-php-entrypoint
+
+# install New Relic PHP agent
+RUN \
+  apt-get update -y && \
+  apt-get install -y gnupg && \
+  echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' > /etc/apt/sources.list.d/newrelic.list && \
+  curl -Ls https://download.newrelic.com/548C16BF.gpg | apt-key add - && \
+  apt-get update -y && \
+  apt-get install -y newrelic-php5 && \
+  newrelic-install install
+COPY newrelic.ini /usr/local/etc/php/conf.d
