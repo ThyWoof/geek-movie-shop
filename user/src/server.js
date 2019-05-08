@@ -1,3 +1,5 @@
+const newrelic = require('newrelic');
+
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
 const redis = require('redis');
@@ -61,6 +63,7 @@ app.get('/uniqueid', (req, res) => {
 
 // check user exists
 app.get('/check/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     if(mongoConnected) {
         usersCollection.findOne({name: req.params.id}).then((user) => {
             if(user) {
@@ -94,6 +97,7 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.body.name);
     req.log.info('login', req.body);
     if(req.body.name === undefined || req.body.password === undefined) {
         req.log.warn('credentials not complete');
@@ -124,6 +128,7 @@ app.post('/login', (req, res) => {
 
 // TODO - validate email address format
 app.post('/register', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.body.name);
     req.log.info('register', req.body);
     if(req.body.name === undefined || req.body.password === undefined || req.body.email === undefined) {
         req.log.warn('insufficient data');
@@ -159,6 +164,7 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/order/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     req.log.info('order', req.body);
     // only for registered users
     if(mongoConnected) {
@@ -213,6 +219,7 @@ app.post('/order/:id', (req, res) => {
 });
 
 app.get('/history/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     if(mongoConnected) {
         ordersCollection.findOne({
             name: req.params.id
