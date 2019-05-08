@@ -200,6 +200,8 @@ services:
       - SHIPPING_HOST=shipping
       - RATINGS_HOST=ratings
       - PAYMENT_HOST=payment
+      - NEW_RELIC_BROWSER_LICENSE_KEY=$NEW_RELIC_BROWSER_LICENSE_KEY
+      - NEW_RELIC_BROWSER_APPLICATION_ID=$NEW_RELIC_BROWSER_APPLICATION_ID
   loader:
     build:
       context: loader

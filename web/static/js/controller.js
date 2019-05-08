@@ -71,6 +71,7 @@
 
     robotshop.controller('shopform', function($scope, $http, $location, currentUser) {
 
+        newrelic.addPageAction('shopForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
 
         $scope.data.uniqueid = 'foo';
@@ -161,6 +162,7 @@
 
     robotshop.controller('searchform', function($scope, $http, $routeParams) {
 
+        newrelic.addPageAction('searchForm',{});
         $scope.data = {};
         $scope.data.searchResults = [];
 
@@ -185,6 +187,7 @@
 
     robotshop.controller('productform', function($scope, $http, $routeParams, $timeout, currentUser) {
 
+        newrelic.addPageAction('productForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
         $scope.data.message = ' ';
         $scope.data.product = {};
@@ -267,6 +270,7 @@
 
     robotshop.controller('cartform', function($scope, $http, $location, currentUser) {
 
+        newrelic.addPageAction('cartForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
         $scope.data.cart = {};
         $scope.data.cart.total = 0;
@@ -322,6 +326,7 @@
 
     robotshop.controller('shipform', function($scope, $http, $location, currentUser) {
 
+        newrelic.addPageAction('shipForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
         $scope.data.countries = [];
         $scope.data.selectedCountry = '';
@@ -425,6 +430,7 @@
 
     robotshop.controller('paymentform', function($scope, $http, currentUser) {
 
+        newrelic.addPageAction('paymentForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
         $scope.data.message = ' ';
         $scope.data.buttonDisabled = false;
@@ -460,6 +466,7 @@
 
     robotshop.controller('loginform', function($scope, $http, currentUser) {
 
+        newrelic.addPageAction('loginForm', { user_id: currentUser.uniqueid});
         $scope.data = {};
         $scope.data.name = '';
         $scope.data.email = '';
@@ -478,6 +485,7 @@
                     password: $scope.data.password
                 }
             }).then((res) => {
+                newrelic.addPageAction('validLogin', { user_id: currentUser.uniqueid });
                 var oldId = currentUser.uniqueid;
                 $scope.data.user = res.data;
                 $scope.data.user.password = '';
@@ -496,6 +504,7 @@
                 });
                 loadHistory(currentUser.user.name);
             }).catch((e) => {
+                newrelic.addPageAction('invalidLogin', { user_id: currentUser.uniqueid });
                 console.log('ERROR', e);
                 $scope.data.message = 'ERROR ' + e.data;
                 $scope.data.password = '';
@@ -529,6 +538,13 @@
                     name: $scope.data.name,
                     email: $scope.data.email
                 };
+                newrelic.addPageAction(
+                    'registerForm',
+                    {
+                        username: $scope.data.name, 
+                        email: $scope.data.email
+                    }
+                );
                 $scope.data.password = $scope.data.password2 = '';
                 currentUser.user = $scope.data.user;
                 currentUser.uniqueid = $scope.data.user.name;
