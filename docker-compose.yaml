@@ -92,6 +92,10 @@ services:
     environment:
       - MONGO_HOST=mongodb
       - REDIS_HOST=redis
+      - NEW_RELIC_APP_NAME=user-service
+      - NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
+      - NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+      - NEW_RELIC_LABELS=clusterName:$CLUSTER_NAME;service:user
   shipping:
     build:
       context: shipping
