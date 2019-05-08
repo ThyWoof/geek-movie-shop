@@ -46,7 +46,7 @@
     - Angular.JS
         - web
 
-4. Observability in New Relic, part 2
+6. Observability in New Relic, part 2
     - Check data on INSIGHTS
         - custom attributes
         - custom events
@@ -60,15 +60,15 @@
         - processes
         - container attributes
 
-5. Kubernetes Setup
+7. Kubernetes Setup
     - run setup-eks-cluster.sh
 
-6. Kubernetes Deployment
+8. Kubernetes Deployment
     - run _infra/k8-newrelic.sh -c
     - run _infra/k8-services.sh -c
     - run _infra/k8-loader.sh -c
 
-6. Instrumentation (Infrastructure)
+9. Instrumentation (Infrastructure)
     - Services
         - Kubernetes
         - MongoDB
@@ -77,7 +77,7 @@
         - Redis
     - Deploy manifests
 
-7. Observability in New Relic, part 3
+10. Observability in New Relic, part 3
     - Check data on INFRASTRUCTURE
         - Kubernetes Cluster Explorer
         - On Host Integrations Dashboards
