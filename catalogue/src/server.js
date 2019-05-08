@@ -1,3 +1,5 @@
+const newrelic = require('newrelic');
+
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
 const bodyParser = require('body-parser');
@@ -57,6 +59,7 @@ app.get('/products', (req, res) => {
 
 // product by SKU
 app.get('/product/:sku', (req, res) => {
+    newrelic.addCustomAttribute('sku', req.params.sku);
     if(mongoConnected) {
         collection.findOne({sku: req.params.sku}).then((product) => {
             req.log.info('product', product);
@@ -77,6 +80,7 @@ app.get('/product/:sku', (req, res) => {
 
 // products in a category
 app.get('/products/:cat', (req, res) => {
+    newrelic.addCustomAttribute('category', req.params.cat);
     if(mongoConnected) {
         collection.find({ categories: req.params.cat }).sort({ name: 1 }).toArray().then((products) => {
             if(products) {
@@ -111,6 +115,7 @@ app.get('/categories', (req, res) => {
 
 // search name and description
 app.get('/search/:text', (req, res) => {
+    newrelic.addCustomAttribute('searchText', req.params.text);
     if(mongoConnected) {
         collection.find({ '$text': { '$search': req.params.text }}).toArray().then((hits) => {
             res.json(hits);
@@ -140,7 +145,7 @@ function mongoConnect() {
         });
     });
 }
-
+// "mongodb://localhost:27017/exampleDb"
 // mongodb connection retry loop
 function mongoLoop() {
     mongoConnect().then((r) => {
