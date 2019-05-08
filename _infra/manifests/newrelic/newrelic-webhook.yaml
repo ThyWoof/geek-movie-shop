@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: newrelic-webhook-deployment
+  namespace: default
+  labels:
+    app: newrelic-webhook
+spec:
+  replicas: 1
+  template:
+    metadata:
+      namespace: default
+      labels:
+        app: newrelic-webhook
+    spec:
+      serviceAccountName: newrelic-webhook-service-account
+      containers:
+      - name: newrelic-webhook-injector
+        image: newrelic/k8s-webhook:latest
+        env:
+        - name: clusterName
+          value: "$CLUSTER_NAME"
+        - name: NRIA_LICENSE_KEY
+          value: "$NEW_RELIC_LICENSE_KEY"
+        volumeMounts:
+        - name: tls-key-cert-pair
+          mountPath: /etc/tls-key-cert-pair
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 1
+        resources: {}
+      volumes:
+      - name: tls-key-cert-pair
+        secret:
+          secretName: newrelic-webhook-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: newrelic-webhook-svc
+  namespace: default
+  labels:
+    app: newrelic-webhook
+spec:
+  ports:
+  - port: 443
+    targetPort: 443
+  selector:
+    app: newrelic-webhook
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: newrelic-webhook-cfg
+  labels:
+    app: newrelic-webhook
+webhooks:
+- name: webhook.newrelic.com
+  clientConfig:
+    service:
+      name: newrelic-webhook-svc
+      namespace: default
+      path: "/mutate"
+    caBundle: ""
+  rules:
+  - operations: [ "CREATE" ]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  # Uncomment these lines in case you want to enable the metadata decoration
+  # only for pods living in namespaces labeled with 'newrelic-webhook'.
+  # namespaceSelector:
+  #   matchLabels:
+  #     newrelic-webhook: enabled
+  failurePolicy: Ignore
