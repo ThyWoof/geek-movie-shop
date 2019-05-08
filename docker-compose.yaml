@@ -168,6 +168,8 @@ services:
       - geek-shop
     environment:
       - AMQP_HOST=rabbitmq
+      - NEW_RELIC_APP_NAME=dispatch-service
+      - NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
     deploy:
       replicas: 1
       restart_policy:

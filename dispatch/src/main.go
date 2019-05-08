@@ -10,6 +10,7 @@ import (
     "encoding/json"
 
     "github.com/streadway/amqp"
+    "github.com/newrelic/go-agent"
 )
 
 const (
@@ -22,6 +23,7 @@ var (
     rabbitCloseError chan *amqp.Error
     rabbitReady chan bool
     errorPercent int
+    app newrelic.Application
 )
 
 func connectToRabbitMQ(uri string) *amqp.Connection {
@@ -78,16 +80,17 @@ func failOnError(err error, msg string) {
     }
 }
 
-func getOrderId(order []byte) string {
-    id := "unknown"
+func getOrderDetails(order []byte) (string, string) {
+    orderId := "unknown"
+    userId := "unknown"
     var f interface{}
     err := json.Unmarshal(order, &f)
     if err == nil {
         m := f.(map[string]interface{})
-        id = m["orderid"].(string)
+        orderId = m["orderid"].(string)
+        userId = m["user"].(string)
     }
-
-    return id
+    return userId, orderId
 }
 
 func processSale() {
@@ -95,18 +98,19 @@ func processSale() {
 }
 
 func main() {
-    // appName, ok := os.LookupEnv("NEW_RELIC_APP_NAME")
-    // if !ok {
-    //     appName = "dispatch-service"
-    // }
-    // licenseKey, ok := os.LookupEnv("NEW_RELIC_LICENSE_KEY")
-    // if ok {
-    //     config := newrelic.NewConfig(appName, licenseKey)
-    //     config.CrossApplicationTracer.Enabled = false
-    //     config.DistributedTracer.Enabled = true
-    //     config.Labels = map[string]string{"service": "dispatch"}
-    //     app, _ = newrelic.NewApplication(config)
-    // }
+    // Init New Relic Agent
+    appName, ok := os.LookupEnv("NEW_RELIC_APP_NAME")
+    if !ok {
+        appName = "dispatch-service"
+    }
+    licenseKey, ok := os.LookupEnv("NEW_RELIC_LICENSE_KEY")
+    if ok {
+        config := newrelic.NewConfig(appName, licenseKey)
+        config.CrossApplicationTracer.Enabled = false
+        config.DistributedTracer.Enabled = true
+        config.Labels = map[string]string{"service": "dispatch"}
+        app, _ = newrelic.NewApplication(config)
+    }
 
     // Init amqpUri
     // get host from environment
@@ -138,7 +142,7 @@ func main() {
 
     // MQ ready channel
     rabbitReady = make(chan bool)
-
+ 
     go rabbitConnector(amqpUri)
 
     rabbitCloseError <- amqp.ErrClosed
@@ -149,17 +153,21 @@ func main() {
             ready := <-rabbitReady
             log.Printf("Rabbit MQ ready %v\n", ready)
 
-            // subscribe to bound queue
+            // create new Transaction
+            txn := app.StartTransaction("/consume/order", nil, nil)
+            defer txn.End()
+            
 
+            // subscribe to bound queue
             msgs, err := rabbitChan.Consume("orders", "", true, false, false, false, nil)
             failOnError(err, "Failed to consume")
 
             for d := range msgs {
                 log.Printf("Order %s\n", d.Body)
                 log.Printf("Headers %v\n", d.Headers)
-                // id := getOrderId(d.Body)
-                
-                time.Sleep(time.Duration(42 + rand.Int63n(42)) * time.Millisecond)
+                userId, orderId := getOrderDetails(d.Body)
+                txn.AddAttribute("user_id", userId)
+                txn.AddAttribute("order_id", orderId)
                 processSale()
             }
         }
