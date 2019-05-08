@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment-$CLUSTER_NAME
+  labels:
+    app: mongodb-$CLUSTER_NAME
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb-$CLUSTER_NAME
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mongodb-$CLUSTER_NAME
+        cloudProvider: $CLUSTER_NAME
+        app: mongodb-$CLUSTER_NAME
+    spec:
+      containers:
+      - name: mongodb-$CLUSTER_NAME
+        image: $DOCKERHUB_USER/rs-mongodb:$TAG
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: mongodb-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "27017"
+    port: 27017
+    targetPort: 27017
+  selector:
+    io.kompose.service: mongodb-$CLUSTER_NAME
+status:
+  loadBalancer: {}

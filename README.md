@@ -98,9 +98,22 @@ The store front is available on [http://EC2_INSTANCE_PUBLIC_DNS:8888](http://loc
     `cd ~/${GITHUB_REPO}`
     
     `./setup-eks-cluster.sh`
-    
+
 2. Install New Relic Agents
 
     `cd ~/${GITHUB_REPO}/_infra`
 
     `./k8-newrelic.sh -c`
+    
+3. Deploy services
+
+    `./k8-services.sh -c`
+
+4. Take note of EKS Load Balancer public URL
+
+    `kubectl get services`
+
+5. Update .env PUBLIC_URL variable with this DNS name on port 8080
+6. Deploy the loader
+
+    `./k8-loader.sh -c`

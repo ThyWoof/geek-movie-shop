@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: dispatch-$CLUSTER_NAME
+    cloudProvider: $CLUSTER_NAME
+  name: dispatch-$CLUSTER_NAME
+spec:
+  containers:
+  - env:
+    - name: NEW_RELIC_APP_NAME
+      value: dispatch-service-$CLUSTER_NAME;dispatch-service
+    - name: NEW_RELIC_LICENSE_KEY
+      value: $NEW_RELIC_LICENSE_KEY
+    - name: AMQP_HOST
+      value: rabbitmq-$CLUSTER_NAME
+    image: $DOCKERHUB_USER/rs-dispatch:$TAG
+    name: dispatch-$CLUSTER_NAME
+    ports:
+    - containerPort: 8080
+    resources: {}
+  restartPolicy: OnFailure
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: dispatch-$CLUSTER_NAME
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    io.kompose.service: dispatch-$CLUSTER_NAME
+status:
+  loadBalancer: {}

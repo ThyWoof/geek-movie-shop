@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: ratings-$CLUSTER_NAME
+    cloudProvider: $CLUSTER_NAME
+  name: ratings-$CLUSTER_NAME
+spec:
+  containers:
+  - env:
+    - name: NEW_RELIC_APP_NAME
+      value: ratings-service-$CLUSTER_NAME;ratings-service
+    - name: NEW_RELIC_LICENSE_KEY
+      value: $NEW_RELIC_LICENSE_KEY
+    - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+      value: "true"
+    - name: NEW_RELIC_LABELS
+      value: clusterName:$CLUSTER_NAME;service:ratings
+    - name: CATALOGUE_HOST
+      value: catalogue-$CLUSTER_NAME
+    - name: MYSQL_HOST
+      value: mysql-$CLUSTER_NAME
+    image: $DOCKERHUB_USER/rs-ratings:$TAG
+    name: ratings-$CLUSTER_NAME
+    ports:
+    - containerPort: 8080
+    resources: {}
+  restartPolicy: OnFailure
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cloudProvider: $CLUSTER_NAME
+  name: ratings-$CLUSTER_NAME
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+  selector:
+    io.kompose.service: ratings-$CLUSTER_NAME
+status:
+  loadBalancer: {}
