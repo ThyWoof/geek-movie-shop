@@ -1,3 +1,6 @@
+import newrelic.agent
+newrelic.agent.initialize('/app/newrelic.ini')
+
 import os
 import sys
 import time
@@ -30,6 +33,7 @@ def health():
 
 @app.route('/pay/<id>', methods=['POST'])
 def pay(id):
+    newrelic.agent.add_custom_parameter('user_id', id)
     app.logger.info('payment for {}'.format(id))
     cart = request.get_json()
     app.logger.info(cart)
