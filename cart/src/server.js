@@ -1,3 +1,5 @@
+const newrelic = require('newrelic');
+
 const redis = require('redis');
 const request = require('request');
 const bodyParser = require('body-parser');
@@ -24,6 +26,11 @@ const app = express();
 app.use(expLogger);
 
 app.use((req, res, next) => {
+    // newrelic.addCustomAttributes({
+    //     'user_id': req.params.id,
+    //     'sku': req.params.sku,
+    //     'quantity': req.params.qty
+    // });
     res.set('Timing-Allow-Origin', '*');
     res.set('Access-Control-Allow-Origin', '*');
     next();
@@ -42,6 +49,7 @@ app.get('/health', (req, res) => {
 
 // get cart with id
 app.get('/cart/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     redisClient.get(req.params.id, (err, data) => {
         if(err) {
             req.log.error('ERROR', err);
@@ -59,6 +67,7 @@ app.get('/cart/:id', (req, res) => {
 
 // delete cart with id
 app.delete('/cart/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     redisClient.del(req.params.id, (err, data) => {
         if(err) {
             req.log.error('ERROR', err);
@@ -75,6 +84,7 @@ app.delete('/cart/:id', (req, res) => {
 
 // rename cart i.e. at login
 app.get('/rename/:from/:to', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.to);
     redisClient.get(req.params.from, (err, data) => {
         if(err) {
             req.log.error('ERROR', err);
@@ -97,6 +107,11 @@ app.get('/rename/:from/:to', (req, res) => {
 
 // update/create cart
 app.get('/add/:id/:sku/:qty', (req, res) => {
+    newrelic.addCustomAttributes({
+        'user_id': req.params.id,
+        'sku': req.params.sku,
+        'quantity': req.params.qty
+    });
     // check quantity
     var qty = parseInt(req.params.qty);
     if(isNaN(qty)) {
@@ -170,6 +185,11 @@ app.get('/add/:id/:sku/:qty', (req, res) => {
 
 // update quantity - remove item when qty == 0
 app.get('/update/:id/:sku/:qty', (req, res) => {
+    newrelic.addCustomAttributes({
+        'user_id': req.params.id,
+        'sku': req.params.sku,
+        'quantity': req.params.qty
+    });
     // check quantity
     var qty = parseInt(req.params.qty);
     if(isNaN(qty)) {
@@ -226,6 +246,7 @@ app.get('/update/:id/:sku/:qty', (req, res) => {
 
 // add shipping
 app.post('/shipping/:id', (req, res) => {
+    newrelic.addCustomAttribute('user_id', req.params.id);
     var shipping = req.body;
     if(shipping.distance === undefined || shipping.cost === undefined || shipping.location == undefined) {
         req.log.warn('shipping data missing', shipping);
