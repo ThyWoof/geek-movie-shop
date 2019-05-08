@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-newrelic-integrations-config
+  namespace: default
+data:
+  config.yaml: |
+    integration_name: com.newrelic.redis
+    instances:
+      - name: redis-metrics
+        command: metrics
+        arguments:
+          hostname: redis-$CLUSTER_NAME
+          port: 6379
+          remote_monitoring: true
+        labels:
+          environment: production
+      - name: redis-inventory
+        command: inventory
+        arguments:
+          hostname: redis-$CLUSTER_NAME
+          port: 6379
+          remote_monitoring: true
+  definition.yaml: |
+    name: com.newrelic.redis
+    description: Reports status and metrics for redis service
+    protocol_version: 1
+    os: linux
+    commands:
+      metrics:
+        command:
+          - ./bin/nr-redis
+          - --metrics
+        interval: 15
+      inventory:
+        command:
+          - ./bin/nr-redis
+          - --inventory
+        prefix: config/redis
+        interval: 60

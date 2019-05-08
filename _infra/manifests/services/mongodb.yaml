@@ -11,6 +11,9 @@ spec:
       app: mongodb-$CLUSTER_NAME
   template:
     metadata:
+      annotations:
+        newrelic.com/integrations-sidecar-configmap: "mongodb-newrelic-integrations-config"
+        newrelic.com/integrations-sidecar-imagename: "newrelic/k8s-nri-mongodb"
       labels:
         io.kompose.service: mongodb-$CLUSTER_NAME
         cloudProvider: $CLUSTER_NAME

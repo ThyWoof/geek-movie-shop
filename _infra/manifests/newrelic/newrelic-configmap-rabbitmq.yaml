@@ -1,0 +1,37 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-newrelic-integrations-config
+  namespace: default
+data:
+  config.yaml: |
+    integration_name: com.newrelic.rabbitmq
+    instances:
+      - name: rabbitmq
+        command: all
+        arguments:
+          username: guest
+          password: guest
+  definition.yaml: |
+    name: com.newrelic.rabbitmq
+    description: Reports status and metrics for rabbitmq service
+    protocol_version: 1
+    os: linux
+    commands:
+      all:
+        command:
+          - ./bin/nr-rabbitmq
+        prefix: config/rabbitmq
+        interval: 30
+      inventory:
+        command:
+          - ./bin/nr-rabbitmq
+          - -inventory
+        prefix: config/rabbitmq
+        interval: 30
+      events:
+        command:
+          - ./bin/nr-rabbitmq
+          - -events
+        interval: 30

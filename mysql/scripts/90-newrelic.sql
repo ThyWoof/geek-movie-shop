@@ -1,0 +1,2 @@
+CREATE USER 'newrelic'@'%' IDENTIFIED BY 'newrelic';
+GRANT REPLICATION CLIENT ON *.* TO 'newrelic'@'%' WITH MAX_USER_CONNECTIONS 5;

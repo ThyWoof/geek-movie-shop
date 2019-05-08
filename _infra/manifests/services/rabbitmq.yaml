@@ -11,6 +11,9 @@ spec:
       app: rabbitmq-$CLUSTER_NAME
   template:
     metadata:
+      annotations:
+        newrelic.com/integrations-sidecar-configmap: "rabbitmq-newrelic-integrations-config"
+        newrelic.com/integrations-sidecar-imagename: "newrelic/k8s-nri-rabbitmq"
       labels:
         io.kompose.service: rabbitmq-$CLUSTER_NAME
         cloudProvider: $CLUSTER_NAME

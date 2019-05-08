@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-newrelic-integrations-config
+  namespace: default
+data:
+  config.yaml: |
+    integration_name: com.newrelic.mysql
+    instances:
+      - name: mysql-server
+        command: status
+        arguments:
+          hostname: mysql-$CLUSTER_NAME
+          port: 3306
+          username: newrelic
+          password: newrelic
+          remote_monitoring: true
+  definition.yaml: |
+    name: com.newrelic.mysql
+    description: Reports status and metrics for mysql server
+    protocol_version: 1
+    os: linux
+    commands:
+        status:
+            command:
+                - /var/db/newrelic-infra/newrelic-integrations/bin/nr-mysql
+            prefix: config/mysql
+            interval: 30

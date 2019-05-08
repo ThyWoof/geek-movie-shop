@@ -80,3 +80,19 @@ render_yaml manifests/newrelic/newrelic-webhook.yaml |
 # installs the kubernetes NRI service account, roles and daemon sets
 render_yaml manifests/newrelic/newrelic-infrastructure-k8s.yaml |
   kubectl $COMMAND -f -
+
+# installs the mongodb NRI config map
+render_yaml manifests/newrelic/newrelic-configmap-mongodb.yaml |
+  kubectl $COMMAND -f -
+
+# installs the mysql NRI config map
+render_yaml manifests/newrelic/newrelic-configmap-mysql.yaml |
+  kubectl $COMMAND -f -
+
+# installs the rabbitmq NRI config map
+render_yaml manifests/newrelic/newrelic-configmap-rabbitmq.yaml |
+  kubectl $COMMAND -f -
+
+# installs the redis NRI config map
+render_yaml manifests/newrelic/newrelic-configmap-redis.yaml |
+  kubectl $COMMAND -f -

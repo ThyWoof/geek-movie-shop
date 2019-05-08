@@ -11,6 +11,9 @@ spec:
       app: redis-$CLUSTER_NAME
   template:
     metadata:
+      annotations:
+        newrelic.com/integrations-sidecar-configmap: "redis-newrelic-integrations-config"
+        newrelic.com/integrations-sidecar-imagename: "newrelic/k8s-nri-redis"
       labels:
         io.kompose.service: redis-$CLUSTER_NAME
         cloudProvider: $CLUSTER_NAME
