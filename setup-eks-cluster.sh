@@ -3,17 +3,17 @@
 # AUTHOR: Paulo Monteiro @ New Relic - 2019-04
 #
 
+IFS=$'\n'
+for VAR in $(egrep '^.+=' ./.env)
+do
+  export $VAR
+done
+
 # publish your images
 
 cd ~/${GITHUB_REPO}
 docker login
-docker-compose build
 docker-compose push
-
-# source the variables
-
-cd ~/${GITHUB_REPO}
-. env.sh
 
 # install kubectl
 
@@ -42,7 +42,7 @@ sudo mv /tmp/eksctl /usr/local/bin
 
 # create the basic EKS cluster (when done consider saving ~/.kube/config to a safe place)
 
-eksctl create cluster --region=${AWS_REGION} --name=${CLUSTER_NAME}
+eksctl create cluster --nodes 1 --region=${AWS_REGION} --name=${CLUSTER_NAME}
 
 # check if everything is sound
 
