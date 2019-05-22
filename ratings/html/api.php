@@ -27,6 +27,10 @@ class RatingsAPI extends API {
 
     // ratings/fetch/sku
     protected function fetch() {
+        if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+            newrelic_name_transaction('rating_fetch');
+        }
+
         if($this->method == 'GET' && isset($this->verb) && count($this->args) == 0) {
             $sku = $this->verb;
             if (extension_loaded('newrelic')) { // Ensure PHP agent is available
@@ -45,6 +49,9 @@ class RatingsAPI extends API {
 
     // ratings/rate/sku/score
     protected function rate() {
+        if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+            newrelic_name_transaction('rate_score');
+        }
         if($this->method == 'PUT' && isset($this->verb) && count($this->args) == 1) {
             $sku = $this->verb;
             $score = intval($this->args[0]);
